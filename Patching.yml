@@ -7,16 +7,16 @@
       debugger: checkpre
       ignore_errors: true
 
-    - name: Pretask of servers
-      shell: '/tmp/pretask.sh'
-      when: checkpre.rc != 0
-
     - name: if pretask is not available
       copy: 
         src: /pretask.sh
         dest: /tmp/pretask.sh
-      when: checkpre.rc = 0
+      when: checkpre.rc != 0
       
+    - name: Pretask of servers
+      shell: '/tmp/pretask.sh'
+      when: checkpre.rc = 0
+
     - name: /var clean up
       command: yum clean all
 
