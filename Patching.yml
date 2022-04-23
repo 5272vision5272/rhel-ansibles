@@ -1,0 +1,36 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: if pretask is pretask script is there or not
+      shell: 'ls -l /tmp/pretask.sh | wc -l'
+      register: checkpre
+      debugger: checkpre
+      ignore_errors: true
+
+    - name: Pretask of servers
+      shell: '/tmp/pretask.sh'
+      when: checkpre.rc != 0
+
+    - name: if pretask is not available
+      copy: 
+        src: /pretask.sh
+        dest: /tmp/pretask.sh
+      when: checkpre.rc = 0
+      
+    - name: /var clean up
+      command: yum clean all
+
+    - name: Disable EPEL
+      yum:
+        name: '*'
+        state: latest
+        disablerepo: 'EPEL7'
+
+    - name: verify the kernel update
+      command: echo '`cat /etc/redhat-release`|`uptime`|`rpm -qa --last kernel | head -1`|`uname -r`'
+      register: verify-kernel
+      debug: 
+        var: verify-kernel.stdout_lines
+
+    
+       
